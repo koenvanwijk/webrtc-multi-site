@@ -1,0 +1,13 @@
+*{box-sizing:border-box;font-family:system-ui,Segoe UI,Arial,sans-serif}
+body{margin:0;padding:24px;background:#0d1117;color:#e6edf3}
+.container{max-width:900px;margin:0 auto}
+h1,h2{margin:16px 0}
+.row{display:flex;gap:12px;align-items:center;margin:8px 0}
+label{min-width:140px;opacity:.8}
+input,select,button{padding:8px 10px;border-radius:6px;border:1px solid #30363d;background:#161b22;color:#e6edf3}
+button{cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.preview{margin:16px 0;border:1px solid #30363d;border-radius:8px;padding:8px;background:#0b0f14}
+video{max-width:100%;border-radius:6px;background:#000}
+#recordings a{display:block;margin:6px 0;color:#8ab4f8;text-decoration:none}
+pre{background:#0b0f14;border:1px solid #30363d;padding:12px;border-radius:6px;white-space:pre-wrap}

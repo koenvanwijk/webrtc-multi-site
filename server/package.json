@@ -1,0 +1,14 @@
+{
+  "name": "webrtc-multi-site-p2p-server",
+  "version": "1.0.0",
+  "description": "Minimal WebSocket signaling server for multi-site P2P WebRTC (no TURN)",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1",
+    "ws": "^8.18.0"
+  }
+}

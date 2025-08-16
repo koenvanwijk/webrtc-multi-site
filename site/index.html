@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Site Publisher</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Site Publisher</h1>
+    <div class="row">
+      <label>Signaling URL</label>
+      <input id="wsUrl" placeholder="ws://localhost:8080" value="ws://localhost:8080"/>
+    </div>
+    <div class="row">
+      <label>Site ID</label>
+      <input id="siteId" placeholder="warehouse-1" />
+    </div>
+    <div class="row">
+      <label>Camera</label>
+      <select id="cameraSelect"></select>
+    </div>
+    <div class="row">
+      <label>Microphone</label>
+      <select id="micSelect"></select>
+    </div>
+    <div class="row">
+      <button id="startBtn">Start Publishing</button>
+      <button id="stopBtn" disabled>Stop</button>
+    </div>
+
+    <div class="preview">
+      <video id="localVideo" autoplay playsinline muted></video>
+    </div>
+
+    <h2>Local Recording</h2>
+    <div class="row">
+      <button id="recToggle">Start Recording</button>
+      <label>Chunk (s)</label>
+      <input id="recChunkSec" type="number" min="5" max="600" value="120" />
+    </div>
+    <div id="recordings"></div>
+
+    <h2>Status</h2>
+    <pre id="status"></pre>
+  </div>
+
+  <script src="site.js"></script>
+</body>
+</html>

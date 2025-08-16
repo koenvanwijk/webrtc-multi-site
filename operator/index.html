@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Operator Console</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Operator Console</h1>
+    <div class="row">
+      <label>Signaling URL</label>
+      <input id="wsUrl" placeholder="ws://localhost:8080" value="ws://localhost:8080"/>
+    </div>
+    <div class="row">
+      <label>Sites (comma-separated)</label>
+      <input id="sites" placeholder="warehouse-1,plant-2,shop-9" />
+    </div>
+    <div class="row">
+      <button id="connectBtn">Connect</button>
+      <button id="disconnectBtn" disabled>Disconnect</button>
+    </div>
+
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <template id="tileTmpl">
+    <div class="tile">
+      <div class="tileHeader">
+        <span class="siteLabel"></span>
+        <div class="btns">
+          <button class="primaryBtn" title="Promote to primary">⭐ Primary</button>
+          <button class="statsBtn" title="Toggle stats">📈</button>
+        </div>
+      </div>
+      <video class="vid" autoplay playsinline></video>
+      <div class="stats hidden"></div>
+    </div>
+  </template>
+
+  <script src="operator.js"></script>
+</body>
+</html>
