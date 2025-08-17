@@ -20,9 +20,14 @@
     <div class="row">
       <button id="connectBtn">Connect</button>
       <button id="disconnectBtn" disabled>Disconnect</button>
+      <button id="overviewBtn" disabled title="Return to overview">Overview</button>
     </div>
 
     <div id="grid" class="grid"></div>
+    <div id="focusLayout" class="focusLayout hidden">
+      <div id="primaryArea" class="primaryArea"></div>
+      <div id="sideList" class="sideList"></div>
+    </div>
   </div>
 
   <template id="tileTmpl">

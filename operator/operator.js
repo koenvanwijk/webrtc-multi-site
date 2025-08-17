@@ -10,6 +10,17 @@ const els = {
   tileTmpl: document.getElementById('tileTmpl'),
 };
 
+const layout = {
+  focusMode: false,
+  primarySite: null,
+  gridEl: els.grid,
+  focusRoot: document.getElementById('focusLayout'),
+  primaryArea: document.getElementById('primaryArea'),
+  sideList: document.getElementById('sideList'),
+  overviewBtn: document.getElementById('overviewBtn'),
+};
+layout.overviewBtn.onclick = () => exitFocusMode();
+
 function rtcConfig() {
   return {
     iceServers: [
@@ -57,10 +68,10 @@ function createTile(siteId) {
 
 async function watchSite(siteId) {
   const { tile, video, stats, primaryBtn, badge } = createTile(siteId);
-
   const pc = new RTCPeerConnection(rtcConfig());
-  const p = { pc, videoEl: video, statsEl: stats, primary: false, dcState: null, dcTeleop: null, statsTimer: null, primaryBtn: primaryBtn, badge };
+  const p = { pc, videoEl: video, statsEl: stats, primary: false, dcState: null, dcTeleop: null, statsTimer: null, primaryBtn: primaryBtn, badge, tile };
   peers.set(siteId, p);
+  if (layout.focusMode) redistributeTiles();
 
   pc.ontrack = (ev) => {
     p.videoEl.srcObject = ev.streams[0];
@@ -182,6 +193,43 @@ async function onRemoteIce(siteId, cand) {
   try { await p.pc.addIceCandidate(cand); } catch {}
 }
 
+function enterFocusMode(siteId) {
+  layout.focusMode = true;
+  layout.primarySite = siteId;
+  document.body.classList.add('fullscreenPrimary');
+  layout.overviewBtn.disabled = false;
+  layout.gridEl.classList.add('hidden');
+  layout.focusRoot.classList.remove('hidden');
+  redistributeTiles();
+}
+function exitFocusMode() {
+  layout.focusMode = false;
+  layout.primarySite = null;
+  document.body.classList.remove('fullscreenPrimary');
+  layout.overviewBtn.disabled = true;
+  layout.gridEl.classList.remove('hidden');
+  layout.focusRoot.classList.add('hidden');
+  // move all tiles back to grid
+  for (const [sid, p] of peers) {
+    if (p.tile && !layout.gridEl.contains(p.tile)) layout.gridEl.appendChild(p.tile);
+  }
+}
+function redistributeTiles() {
+  if (!layout.focusMode) return;
+  layout.primaryArea.innerHTML = '';
+  layout.sideList.innerHTML = '';
+  for (const [sid, p] of peers) {
+    if (!p.tile) continue;
+    if (sid === layout.primarySite) {
+      layout.primaryArea.appendChild(p.tile);
+      p.tile.classList.add('isPrimaryView');
+    } else {
+      layout.sideList.appendChild(p.tile);
+      p.tile.classList.remove('isPrimaryView');
+    }
+  }
+}
+
 function promote(siteId) {
   // Make this tile primary locally (unmute) and tell the site to upgrade us & downgrade others
   for (const [sid, p] of peers) {
@@ -194,6 +242,7 @@ function promote(siteId) {
     }
   }
   wsSend({ type: 'promote', siteId });
+  enterFocusMode(siteId);
 }
 
 // Optional: basic keyboard teleop mapping (sends to the current primary site's teleop DC)
@@ -221,6 +270,7 @@ els.disconnectBtn.onclick = async () => {
     try { p.pc.close(); } catch {}
   }
   peers.clear();
+  exitFocusMode();
   els.disconnectBtn.disabled = true;
   els.connectBtn.disabled = false;
 };

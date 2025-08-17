@@ -228,6 +228,8 @@ els.startBtn.onclick = async () => {
   await getLocalStream();
   await connectWS();
 
+  document.title = `Site: ${siteId}`; // show siteId in tab
+
   els.stopBtn.disabled = false;
   els.recToggle.disabled = false;
   els.attentionBtn.disabled = false;
@@ -245,6 +247,7 @@ els.stopBtn.onclick = async () => {
   els.startBtn.disabled = false;
   els.stopBtn.disabled = true;
   els.attentionBtn.disabled = true;
+  document.title = 'Site Publisher'; // reset title
   logStatus('Stopped.');
 };
 

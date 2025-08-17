@@ -1,0 +1,11 @@
+{
+  "name": "jetson-site-client",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "jetson_site.js",
+  "dependencies": {
+    "minimist": "^1.2.8",
+    "ws": "^8.17.0",
+    "wrtc": "^0.4.7"
+  }
+}
