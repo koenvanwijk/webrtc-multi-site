@@ -97,19 +97,19 @@ async function handleIncomingViewer(operatorId) {
   wsSend({ type: 'offer', to: operatorId, siteId: SITE_ID, sdp: offer });
 }
 
-async function applyBitrates() {
+function applyBitrates() {
   for (const [opId, p] of peers) {
     if (!p.videoSender) continue;
     try {
       const params = p.videoSender.getParameters();
       if (!params.encodings) params.encodings = [{}];
       params.encodings[0].maxBitrate = (opId === primaryOperatorId) ? MAX_HIGH : MAX_LOW;
-      await p.videoSender.setParameters(params);
+      p.videoSender.setParameters(params).catch(()=>{});
     } catch (e) {
       console.warn('setParameters failed', e.message);
     }
   }
-  process.stdout.write(`Primary: ${primaryOperatorId || 'none'} | Peers: ${peers.size}\n`);
+  process.stdout.write('Primary: ' + (primaryOperatorId || 'none') + ' | Peers: ' + peers.size + '\n');
 }
 
 async function onWSMessage(data) {
@@ -137,11 +137,11 @@ async function onWSMessage(data) {
       break; }
     case 'promote':
       primaryOperatorId = msg.operatorId;
-      await applyBitrates();
+      applyBitrates();
       // notify operators of primary change
       for (const [opId, p] of peers) {
-        if (p.dcState?.readyState === 'open') {
-          p.dcState.send(JSON.stringify({ type: 'primary', primary: primaryOperatorId }));
+        if (p.dcState && p.dcState.readyState === 'open') {
+          try { p.dcState.send(JSON.stringify({ type: 'primary', primary: primaryOperatorId })); } catch {}
         }
       }
       break;
