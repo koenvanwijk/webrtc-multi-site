@@ -15,3 +15,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .stats{padding:8px;white-space:pre-wrap;font-size:12px;border-top:1px dashed #30363d}
 .hidden{display:none}
 .siteLabel{opacity:.9}
+.attentionPulse{outline:2px solid #ffbf00;box-shadow:0 0 0 4px rgba(255,191,0,.3);animation:attn 1s infinite alternate}
+@keyframes attn{from{outline-color:#ffbf00}to{outline-color:#ff8000}}
+.tileHeader .attentionBadge{margin-left:6px;color:#ffbf00;font-size:14px;animation:blink 1s steps(2,start) infinite}
+@keyframes blink{50%{opacity:.2}}

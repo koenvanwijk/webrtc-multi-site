@@ -17,6 +17,7 @@ const els = {
   recChunkSec: document.getElementById('recChunkSec'),
   recordings: document.getElementById('recordings'),
   status: document.getElementById('status'),
+  attentionBtn: document.getElementById('attentionBtn'),
 };
 
 async function listDevices() {
@@ -229,6 +230,7 @@ els.startBtn.onclick = async () => {
 
   els.stopBtn.disabled = false;
   els.recToggle.disabled = false;
+  els.attentionBtn.disabled = false;
   logStatus('Publishing. Waiting for operators...');
 };
 
@@ -242,10 +244,17 @@ els.stopBtn.onclick = async () => {
   }
   els.startBtn.disabled = false;
   els.stopBtn.disabled = true;
+  els.attentionBtn.disabled = true;
   logStatus('Stopped.');
 };
 
 els.recToggle.onclick = toggleRecording;
+
+els.attentionBtn.onclick = () => {
+  wsSend({ type: 'attention' });
+  els.attentionBtn.disabled = true;
+  setTimeout(() => { if (ws?.readyState === WebSocket.OPEN) els.attentionBtn.disabled = false; }, 5000);
+};
 
 async function init() {
   await listDevices();

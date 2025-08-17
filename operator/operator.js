@@ -39,19 +39,27 @@ function createTile(siteId) {
   const primaryBtn = frag.querySelector('.primaryBtn');
   const statsBtn = frag.querySelector('.statsBtn');
   const stats = frag.querySelector('.stats');
-
+  // add attention badge placeholder
+  let badge = document.createElement('span');
+  badge.className = 'attentionBadge hidden';
+  badge.textContent = 'ATTN';
+  tile.querySelector('.tileHeader').appendChild(badge);
+  // initialize primary button visual state
+  if (primaryBtn) {
+    primaryBtn.textContent = '☆';
+    primaryBtn.title = 'Make primary';
+  }
   primaryBtn.onclick = () => promote(siteId);
   statsBtn.onclick = () => stats.classList.toggle('hidden');
-
   els.grid.appendChild(tile);
-  return { tile, video, stats, primaryBtn };
+  return { tile, video, stats, primaryBtn, badge };
 }
 
 async function watchSite(siteId) {
-  const { tile, video, stats, primaryBtn } = createTile(siteId);
+  const { tile, video, stats, primaryBtn, badge } = createTile(siteId);
 
   const pc = new RTCPeerConnection(rtcConfig());
-  const p = { pc, videoEl: video, statsEl: stats, primary: false, dcState: null, dcTeleop: null, statsTimer: null };
+  const p = { pc, videoEl: video, statsEl: stats, primary: false, dcState: null, dcTeleop: null, statsTimer: null, primaryBtn: primaryBtn, badge };
   peers.set(siteId, p);
 
   pc.ontrack = (ev) => {
@@ -92,9 +100,21 @@ async function watchSite(siteId) {
       });
       const lines = [];
       if (inbound) {
-        lines.push(`bitrate: ~${Math.round((inbound.bitsReceivedPerSecond||0)/1000)} kbps`);
+        // Bereken bitrate uit bytesReceived delta
+        if (typeof inbound.bytesReceived === 'number' && typeof inbound.timestamp === 'number') {
+          if (p._lastInboundBytes != null && p._lastInboundTs != null) {
+            const bytesDelta = inbound.bytesReceived - p._lastInboundBytes;
+            const timeDeltaSec = (inbound.timestamp - p._lastInboundTs) / 1000; // timestamps in ms
+            if (timeDeltaSec > 0 && bytesDelta >= 0) {
+              const kbps = Math.round((bytesDelta * 8 / timeDeltaSec) / 1000);
+              lines.push(`bitrate: ~${kbps} kbps`);
+            }
+          }
+          p._lastInboundBytes = inbound.bytesReceived;
+          p._lastInboundTs = inbound.timestamp;
+        }
         lines.push(`frames: ${inbound.framesDecoded || 0} dropped: ${inbound.framesDropped || 0}`);
-        lines.push(`jitter: ${inbound.jitter?.toFixed(3) || 0}`);
+        if (inbound.jitter != null) lines.push(`jitter: ${Number(inbound.jitter).toFixed(3)}`);
       }
       if (candidatePair) {
         const rtt = candidatePair.currentRoundTripTime || candidatePair.roundTripTime;
@@ -129,6 +149,21 @@ function onWSMessage(ev) {
     case 'ice':
       onRemoteIce(msg.siteId, msg.candidate);
       break;
+
+    case 'attention': {
+      const p = peers.get(msg.siteId);
+      if (p) {
+        p.tile?.classList.add('attentionPulse');
+        p.badge?.classList.remove('hidden');
+        // auto clear after 10s
+        clearTimeout(p._attnTimer);
+        p._attnTimer = setTimeout(() => {
+          p.tile?.classList.remove('attentionPulse');
+          p.badge?.classList.add('hidden');
+        }, 10000);
+      }
+      break;
+    }
   }
 }
 
@@ -152,6 +187,11 @@ function promote(siteId) {
   for (const [sid, p] of peers) {
     p.primary = (sid === siteId);
     if (p.videoEl) p.videoEl.muted = !p.primary;
+    if (p.primaryBtn) {
+      p.primaryBtn.textContent = p.primary ? '★' : '☆';
+      p.primaryBtn.classList.toggle('is-primary', p.primary);
+      p.primaryBtn.title = p.primary ? 'Primary stream' : 'Make primary';
+    }
   }
   wsSend({ type: 'promote', siteId });
 }
